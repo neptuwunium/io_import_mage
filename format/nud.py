@@ -4,40 +4,13 @@
 
 import struct
 from ctypes import sizeof
-from enum import Enum
 
 import numpy as np
 
+import format.vertex_info as vertex_info
 from format.nud_struct import *
-
-
-class NUDVertexGeometryType(Enum):
-	P32 = 0x0
-	P32N32 = 0x1
-	P32NB32 = 0x2
-	P32NBT32 = 0x3
-	P32N11 = 0x4
-	P32NBT11 = 0x5
-	P32N16 = 0x6
-	P32NBT16 = 0x7
-	P16N16 = 0x8
-
-
-class NUDVertexSkinType(Enum):
-	I0 = 0x0
-	I4W16 = 0x1
-	I4W32 = 0x2
-	I8W16 = 0x3
-	I8W32 = 0x4
-
-
-class NUDVertexUVType(Enum):
-	U16 = 0x0
-	U32 = 0x1
-	C8U16 = 0x2
-	C8U32 = 0x3
-	C16U16 = 0x4
-	C16U32 = 0x5
+from format.vertex_info import NUDVertexUVType, NUDVertexGeometryType, NUDVertexSkinType, VertexStorageType, \
+	VertexSemanticType
 
 
 class NUDVertexType:
@@ -79,6 +52,121 @@ class NUDMaterial:
 			if param.header.next == 0:
 				break
 			position = position + param.header.next
+
+
+STORAGE_TO_NUMPY = {
+	VertexStorageType.RGBA8_UNORM: '>4u1',
+	VertexStorageType.RG32_FLOAT: '>2f4',
+	VertexStorageType.RGB32_FLOAT: '>3f4',
+	VertexStorageType.RGBA32_FLOAT: '>4f4',
+	VertexStorageType.RG16_FLOAT: '>2f2',
+	VertexStorageType.RGB16_FLOAT: '>3f2',
+	VertexStorageType.RGBA16_FLOAT: '>4f2',
+	VertexStorageType.RGBA16_INT: '>4u2',
+}
+
+
+# 16-bit or unorm to 32-bit
+def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.NDArray:
+	match storage:
+		case VertexStorageType.RGBA8_UNORM:
+			return array / 255.0
+		case VertexStorageType.RG16_FLOAT:
+			return array.astype(np.float32)
+		case VertexStorageType.RGB16_FLOAT:
+			return array.astype(np.float32)
+		case VertexStorageType.RGBA16_FLOAT:
+			return array.astype(np.float32)
+		case VertexStorageType.RGBA16_INT:
+			return array.astype(np.int32)
+		case _:
+			return array
+
+
+# todo: copy this for NUDSkinVertexStream, but need to construct the armature first from MOP and MNT :)
+class NUDVertexStream:
+	def __init__(self, nud, prim):
+		geo_info = vertex_info.VERTEX_INFO[prim.vertex_type.geometry_type]
+		uv_info = vertex_info.get_uv_info(vertex_info.VERTEX_INFO[prim.vertex_type.uv_type], prim.vertex_type.uv_count)
+		total_stride = geo_info.stride + uv_info.stride
+
+		vertex_start = prim.header.vertex_offset
+		vertex_count = prim.header.vertex_count
+		vertex_end = vertex_start + vertex_count * total_stride
+
+		names = []
+		semantic_idx = []
+		formats = []
+		offsets = []
+
+		for element in geo_info.elements:
+			semantic = element.type
+			storage = element.storage
+			names.append(semantic.name)
+			formats.append(STORAGE_TO_NUMPY[storage])
+			offsets.append(element.offset)
+			semantic_idx.append(element)
+
+		for element in uv_info.elements:
+			semantic = element.type
+			storage = element.storage
+			names.append(f'{semantic.name}{element.index}' if element.index > 0 else semantic.name)
+			formats.append(STORAGE_TO_NUMPY[storage])
+			offsets.append(element.offset + geo_info.stride)
+			semantic_idx.append(element)
+
+		view = np.frombuffer(nud.vertex_buffer[vertex_start:vertex_end], dtype={
+			'names': names,
+			'formats': formats,
+			'offsets': offsets,
+			'itemsize': total_stride
+		})
+
+		# noinspection PyTypeChecker
+		# reasoning: set to not null
+		self.uv = [None] * prim.vertex_type.uv_count
+		for index in range(len(semantic_idx)):
+			semantic = semantic_idx[index]
+			match semantic.type:
+				case VertexSemanticType.Position:
+					self.position = unwrap(view[names[index]].copy(), semantic.storage)
+				case VertexSemanticType.Normal:
+					self.normal = unwrap(view[names[index]].copy(), semantic.storage)
+				case VertexSemanticType.Color:
+					self.color = unwrap(view[names[index]].copy(), semantic.storage)
+				case VertexSemanticType.UV:
+					self.uv[semantic.index] = unwrap(view[names[index]].copy(), semantic.storage)
+
+
+class NUDTriangleStream:
+	def __init__(self, nud, prim):
+		index_start = prim.header.index_offset // 2
+		index_end = index_start + prim.header.face_count
+		indices = nud.index_buffer[index_start:index_end]
+		restart = np.where(indices == 0xFFFF)[0]
+		strips = np.split(indices, restart)
+
+		triangles = []
+		for strip in strips:
+			if len(strip) > 0 and strip[0] == 0xFFFF:
+				strip = strip[1:]
+
+			if len(strip) < 3:
+				continue
+
+			t0 = strip[:-2]
+			t1 = strip[1:-1]
+			t2 = strip[2:]
+
+			tris = np.column_stack((t0, t1, t2))
+			tris[1::2, [0, 1]] = tris[1::2, [1, 0]]
+
+			degen_mask = (t0 != t1) & (t1 != t2) & (t0 != t2)
+			triangles.append(tris[degen_mask])
+
+		# noinspection PyTypeChecker
+		# reasoning: complex type
+		self.triangles = np.empty((0, 3), dtype=np.uint16) if not triangles else np.vstack(triangles)
 
 
 class NUDPrimitive:
@@ -148,7 +236,9 @@ if __name__ == '__main__':
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
 			from format.mage import MageFile
-
-			nud = NUDFile(MageFile(f).get_mesh(0))
+			nud_file = NUDFile(MageFile(f).get_mesh(0))
 		else:
-			nud = NUDFile(f)
+			nud_file = NUDFile(f)
+
+		vert = NUDVertexStream(nud_file, nud_file.objects[0].primitives[0])
+		tri = NUDTriangleStream(nud_file, nud_file.objects[0].primitives[0])

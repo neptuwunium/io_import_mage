@@ -2,41 +2,13 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from enum import Enum
 from typing import Optional, IO
 
 import numpy as np
+import numpy.typing as npt
 
 from format.nud_struct import *
-
-
-class NUDVertexGeometryType(Enum):
-	P32 = 0x0
-	P32N32 = 0x1
-	P32NB32 = 0x2
-	P32NBT32 = 0x3
-	P32N11 = 0x4
-	P32NBT11 = 0x5
-	P32N16 = 0x6
-	P32NBT16 = 0x7
-	P16N16 = 0x8
-
-
-class NUDVertexSkinType(Enum):
-	I0 = 0x0
-	I4W16 = 0x1
-	I4W32 = 0x2
-	I8W16 = 0x3
-	I8W32 = 0x4
-
-
-class NUDVertexUVType(Enum):
-	U16 = 0x0
-	U32 = 0x1
-	C8U16 = 0x2
-	C8U32 = 0x3
-	C16U16 = 0x4
-	C16U32 = 0x5
+from format.vertex_info import *
 
 
 class NUDVertexType:
@@ -71,6 +43,28 @@ class NUDMaterial:
 	def __init__(self, stream: IO[bytes], string_buffer: bytes): pass
 
 
+class NUDVertexStream:
+	position: npt.NDArray
+	normal: Optional[npt.NDArray]
+	color: Optional[npt.NDArray]
+	uv: list[npt.NDArray]
+
+	def __init__(self, nud: NUDFile, prim: NUDPrimitive): pass
+
+
+class NUDTriangleStream:
+	triangles: npt.NDArray
+
+	def __init__(self, nud: NUDFile, prim: NUDPrimitive): pass
+
+
+class NUDSkinVertexStream:
+	indices: npt.NDArray[np.int16]
+	weights: npt.NDArray[np.float32]
+
+	def __init__(self, nud: NUDFile, prim: NUDPrimitive) -> Optional[NUDSkinVertexStream]: pass
+
+
 class NUDPrimitive:
 	header: NUDPrimitiveHeader
 	materials: list[Optional[NUDMaterial]]
@@ -91,8 +85,8 @@ class NUDFile:
 	valid: bool
 	header: NUDHeader
 	objects: list[NUDObject]
-	index_buffer: np.typing.NDArray[np.uint16]
-	vertex_buffer: np.typing.NDArray[np.uint8]
-	skin_buffer: np.typing.NDArray[np.uint8]
+	index_buffer: npt.NDArray[np.uint16]
+	vertex_buffer: npt.NDArray[np.uint8]
+	skin_buffer: npt.NDArray[np.uint8]
 
 	def __init__(self, stream: Optional[IO[bytes]]): pass
