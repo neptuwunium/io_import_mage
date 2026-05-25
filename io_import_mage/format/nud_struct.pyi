@@ -40,10 +40,10 @@ class NUDMaterialHeader(BigEndianStructure):
 	reserved: int
 	attributes: int
 	texture_count: int
-	unknown1: int
-	unknown2: int
-	unknown3: int
-	unknown4: int
+	alpha_blend: int
+	alpha_test_func: int
+	alpha_test_ref: int
+	cull_mode: int
 	reserved2: int
 	offset_scale: float
 	offset_bias: float

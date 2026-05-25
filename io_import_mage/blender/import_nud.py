@@ -5,16 +5,23 @@
 import bpy
 import numpy as np
 
-from io_import_mage.format.nud import NUDFile, NUDTriangleStream, NUDVertexStream
+from io_import_mage.blender.import_mnt import create_skeleton
+from io_import_mage.format.nud import NUDTriangleStream, NUDVertexStream
+from io_import_mage.format.vertex_info import NUDVertexSkinType
 
 
-def create_material(name: str) -> bpy.types.Material:
+def create_material(name):
 	if name in bpy.data.materials:
 		return bpy.data.materials[name]
 	return bpy.data.materials.new(name=name)
 
-def import_nud(nud: NUDFile, name: str):
+
+def import_nud(nud, mnt, mop, name):
+	if not nud.valid: return
+
 	root = bpy.data.objects.new(name, None)
+	(skeleton, bones) = create_skeleton(mnt, mop, root)
+	bone_count = len(bones)
 	bpy.context.view_layer.active_layer_collection.collection.objects.link(root)
 
 	for obj in nud.objects:
@@ -29,7 +36,22 @@ def import_nud(nud: NUDFile, name: str):
 
 		mesh = bpy.data.meshes.new(obj.name)
 		blend_obj = bpy.data.objects.new(obj.name, mesh)
-		blend_obj.parent = root
+		blend_obj.parent = skeleton or root
+
+		has_weights = False
+		for prim in obj.primitives:
+			if prim.vertex_type.skin_type != NUDVertexSkinType.I0:
+				has_weights = True
+				break
+
+		if has_weights:
+			armature = blend_obj.modifiers.new('ARMATURE')
+			armature.object = skeleton
+		elif obj.header.mnt_index < bone_count:
+			copy_transforms = blend_obj.constraints.new('COPY_TRANSFORMS')
+			copy_transforms.mix_mode = 'REPLACE'
+			copy_transforms.target = skeleton
+			copy_transforms.subtarget = bones[obj.header.mnt_index]
 
 		for prim_idx, prim in enumerate(obj.primitives):
 			vert = NUDVertexStream(nud, prim)
@@ -38,8 +60,15 @@ def import_nud(nud: NUDFile, name: str):
 			positions.append(vert.position)
 			triangles.append(np.array(tri.triangles) + vertex_offset)
 
-			if prim.materials[0] is not None:
-				material_name = f'{name}_{hex(prim.materials[0].unique_id)}'
+			if has_weights:
+				# todo
+				print("skin streams are not supported yet")
+				# skin_vert = NUDSkinStream(nud, prim)
+				pass
+
+			primary_material = prim.materials[0]
+			if primary_material is not None:
+				material_name = f'{name}_{hex(primary_material.unique_id)}'
 				if material_name in material_lookup:
 					material_idx = material_lookup[material_name]
 				else:
@@ -104,14 +133,15 @@ def import_nud(nud: NUDFile, name: str):
 
 if __name__ == '__main__':
 	import sys
+	from io_import_mage.format import *
 
 	with open(sys.argv[-1], 'rb') as f:
 		if sys.argv[-1].endswith('.mage'):
-			from io_import_mage.format.mage import MageFile
 
 			mage = MageFile(f)
 			nud_file = NUDFile(mage.get_mesh(0))
-			import_nud(nud_file, mage.name or "nud")
+			mnt_file = MNTFile(mage.get_node(0))
+			import_nud(nud_file, mnt_file, None, mage.name or "nud")
 		else:
 			nud_file = NUDFile(f)
-			import_nud(nud_file, "nud")
+			import_nud(nud_file, None, None, "nud")

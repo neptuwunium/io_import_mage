@@ -255,7 +255,7 @@ if __name__ == '__main__':
 
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
-			from io_import_mage.mage import MageFile
+			from io_import_mage.format.mage import MageFile
 
 			nud_file = NUDFile(MageFile(f).get_mesh(0))
 		else:

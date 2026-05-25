@@ -16,7 +16,7 @@ website = "https://github.com/neptuwunium/io_import_mage"
 blender_version_min = "5.1.0"
 
 license = [
-  "SPDX:EUPL-1.2",
+    "SPDX:EUPL-1.2",
 ]
 
 [permissions]
@@ -24,6 +24,6 @@ files = "Importing files from disk"
 
 [build]
 paths_exclude_pattern = [
-  "__pycache__",
-  "*.pyc",
+    "__pycache__",
+    "*.pyc",
 ]
