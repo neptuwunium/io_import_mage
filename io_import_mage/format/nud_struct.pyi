@@ -4,7 +4,7 @@
 
 from ctypes import BigEndianStructure
 
-from format.c3dmath import Vector3
+from io_import_mage.format.c3dmath import Vector3
 
 
 class NUDBounds(BigEndianStructure):

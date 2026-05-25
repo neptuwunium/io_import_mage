@@ -7,10 +7,11 @@ from ctypes import sizeof
 
 import numpy as np
 
-import format.vertex_info as vertex_info
-from format.nud_struct import *
-from format.vertex_info import NUDVertexUVType, NUDVertexGeometryType, NUDVertexSkinType, VertexStorageType, \
+from io_import_mage.format.nud_struct import *
+from io_import_mage.format.vertex_info import NUDVertexUVType, NUDVertexGeometryType, NUDVertexSkinType, \
+	VertexStorageType, \
 	VertexSemanticType
+from . import vertex_info
 
 
 class NUDVertexType:
@@ -35,20 +36,34 @@ class NUDTexture:
 		self.header = NUDTextureHeader.from_buffer_copy(stream.read(sizeof(NUDTextureHeader)))
 
 
+def mmhmix(h: int, k: int) -> int:
+	k = (k * 0xcc9e2d51) & 0xffffffff
+	k = ((k << 15) | (k >> 17)) & 0xffffffff
+	k = (k * 0x1b873593) & 0xffffffff
+	h ^= k
+	h = ((h << 13) | (h >> 19)) & 0xffffffff
+	h = (h * 5 + 0xe6546b64) & 0xffffffff
+	return h
+
+
 class NUDMaterial:
 	def __init__(self, stream, string_buffer):
 		self.header = NUDMaterialHeader.from_buffer_copy(stream.read(sizeof(NUDMaterialHeader)))
 		self.textures = []
 		self.params = []
+		self.unique_id = self.header.global_index
 
 		for _ in range(self.header.texture_count):
 			self.textures.append(NUDTexture(stream))
+			self.unique_id = mmhmix(self.unique_id, self.textures[-1].header.global_index)
 
 		position = stream.tell()
 		while True:
 			stream.seek(position)
 			param = NUDShaderParam(stream, string_buffer)
 			self.params.append(param)
+			for item in param.params_int:
+				self.unique_id = mmhmix(self.unique_id, item)
 			if param.header.next == 0:
 				break
 			position = position + param.header.next
@@ -122,6 +137,9 @@ class NUDVertexStream:
 			'itemsize': total_stride
 		})
 
+		self.normal = None
+		self.color = None
+
 		# noinspection PyTypeChecker
 		# reasoning: set to not null
 		self.uv = [None] * prim.vertex_type.uv_count
@@ -135,7 +153,9 @@ class NUDVertexStream:
 				case VertexSemanticType.Color:
 					self.color = unwrap(view[names[index]].copy(), semantic.storage)
 				case VertexSemanticType.UV:
-					self.uv[semantic.index] = unwrap(view[names[index]].copy(), semantic.storage)
+					uv = unwrap(view[names[index]].copy(), semantic.storage)
+					uv[:, 1] = 1.0 - uv[:, 1]
+					self.uv[semantic.index] = uv
 
 
 class NUDTriangleStream:
@@ -235,7 +255,8 @@ if __name__ == '__main__':
 
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
-			from format.mage import MageFile
+			from io_import_mage.mage import MageFile
+
 			nud_file = NUDFile(MageFile(f).get_mesh(0))
 		else:
 			nud_file = NUDFile(f)

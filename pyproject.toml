@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 [project]
-name = "io-import-mage"
+name = "io_import_mage"
 version = "0.1.0"
 requires-python = "==3.13.*"
 

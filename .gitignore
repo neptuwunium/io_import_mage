@@ -18,3 +18,6 @@ __pycache__
 *.mat
 *.coll
 *.bin
+
+*.zip
+*.egg-info

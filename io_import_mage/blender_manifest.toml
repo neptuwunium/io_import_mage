@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 Neptuwunium
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+schema_version = "1.0.0"
+
+id = "io_import_mage"
+version = "1.0.0"
+name = "MAGE Import"
+tagline = "Import MAGE files from the Ulysses extraction tools"
+maintainer = "neptuwunium"
+type = "add-on"
+tags = ["Import-Export"]
+website = "https://github.com/neptuwunium/io_import_mage"
+
+blender_version_min = "5.1.0"
+
+license = [
+  "SPDX:EUPL-1.2",
+]
+
+[permissions]
+files = "Importing files from disk"
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__",
+  "*.pyc",
+]

@@ -7,8 +7,8 @@ from typing import Optional, IO
 import numpy as np
 import numpy.typing as npt
 
-from format.nud_struct import *
-from format.vertex_info import *
+from io_import_mage.format.nud_struct import *
+from io_import_mage.format.vertex_info import *
 
 
 class NUDVertexType:
@@ -39,6 +39,7 @@ class NUDMaterial:
 	header: NUDMaterialHeader
 	textures: list[NUDTexture]
 	params: list[NUDShaderParam]
+	unique_id: int
 
 	def __init__(self, stream: IO[bytes], string_buffer: bytes): pass
 
