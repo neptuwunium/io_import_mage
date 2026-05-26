@@ -17,10 +17,10 @@ def create_material(name):
 	return bpy.data.materials.new(name=name)
 
 
-def import_nud(nud, mnt, mop, name, super_root):
+def import_nud(nud, mnt, mop, name, super_root, shared):
 	if not nud.valid: return
 
-	(root, bones) = create_skeleton(mnt, mop, super_root)
+	(root, bones) = create_skeleton(mnt, mop, super_root, shared)
 	if not root:
 		root = super_root
 	bone_count = len(bones)
@@ -31,7 +31,10 @@ def import_nud(nud, mnt, mop, name, super_root):
 		uvs = {}
 		colors = []
 		normals = []
+		weights = []
+		joints = []
 		material_indices = []
+		groups = []
 		vertex_offset = 0
 		material_lookup = {}
 
@@ -46,16 +49,17 @@ def import_nud(nud, mnt, mop, name, super_root):
 				break
 
 		if has_weights:
-			armature = blend_obj.modifiers.new('ARMATURE')
+			assert obj.header.mnt_index == 0xffff
+			armature = blend_obj.modifiers.new('Armature', 'ARMATURE')
 			armature.object = root
+			for bone in bones:
+				groups.append(blend_obj.vertex_groups.new(name=bone))
 		elif obj.header.mnt_index < bone_count:
-			copy_transforms = blend_obj.constraints.new('COPY_TRANSFORMS')
-			copy_transforms.mix_mode = 'REPLACE'
-			copy_transforms.target = root
-			copy_transforms.target_space = 'POSE'
-			copy_transforms.owner_space = 'LOCAL'
-			copy_transforms.subtarget = bones[obj.header.mnt_index]
+			blend_obj.parent_type = 'BONE'
+			blend_obj.parent_bone = bones[obj.header.mnt_index]
+			blend_obj.parent_bone_head_tail_factor = 0
 
+		# todo: this blows up if the primitives aren't samey, check what values need to be zeroed
 		for prim_idx, prim in enumerate(obj.primitives):
 			vert = NUDVertexStream(nud, prim)
 			tri = NUDTriangleStream(nud, prim)
@@ -64,10 +68,8 @@ def import_nud(nud, mnt, mop, name, super_root):
 			triangles.append(np.array(tri.triangles) + vertex_offset)
 
 			if has_weights:
-				# todo
-				print('skin streams are not supported yet')
-				# skin_vert = NUDSkinStream(nud, prim)
-				pass
+				weights.append(vert.weights)
+				joints.append(vert.joints)
 
 			primary_material = prim.materials[0]
 			if primary_material is not None:
@@ -123,6 +125,17 @@ def import_nud(nud, mnt, mop, name, super_root):
 			layer = mesh.color_attributes.new('Color', 'FLOAT_COLOR', 'POINT')
 			layer.data.foreach_set('color', combined_colors.flatten())
 
+		if weights and joints:
+			weights = np.concatenate(weights)
+			joints = np.concatenate(joints)
+
+			for vertex_index in range(weights.shape[0]):
+				for joint_index in range(weights.shape[1]):
+					weight = float(weights[vertex_index, joint_index])
+					if weight > 0.0:
+						bone_index = int(joints[vertex_index, joint_index])
+						groups[bone_index].add([vertex_index], weight, 'REPLACE')
+
 		mesh.update()
 
 		if normals:
@@ -147,11 +160,17 @@ if __name__ == '__main__':
 		if sys.argv[-1].endswith('.mage'):
 			with MageFile(f) as mage:
 				nud_root.name = mage.name
+				nud_count = mage.get_count(MageFileType.Mesh)
+				mnt_count = mage.get_count(MageFileType.Node)
+				mop_count = mage.get_count(MageFileType.Motion)
+
+				shared_mnt = nud_count != mnt_count
 				for index in range(mage.get_count(MageFileType.Mesh)):
 					nud_file = NUDFile(mage.get_mesh(index))
 					if not nud_file.valid: continue
-					mnt_file = MNTFile(mage.get_node(index))
-					with MOPFile(mage.get_motion(index)) as mop_file:
-						import_nud(nud_file, mnt_file, mop_file, mage.name or 'nud', nud_root)
+					mnt_index = MNTFile.determine_mnt_index(index, nud_count, mnt_count)
+					mnt_file = MNTFile(mage.get_node(mnt_index))
+					with MOPFile(mage.get_motion(mnt_index)) as mop_file:
+						import_nud(nud_file, mnt_file, mop_file, mage.name or 'nud', nud_root, shared_mnt)
 		else:
-			import_nud(NUDFile(f), None, None, 'nud', nud_root)
+			import_nud(NUDFile(f), None, None, 'nud', nud_root, False)

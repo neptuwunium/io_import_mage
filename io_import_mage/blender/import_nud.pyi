@@ -13,4 +13,4 @@ def create_material(name: str) -> bpy.types.Material: pass
 
 
 def import_nud(nud: NUDFile, mnt: Optional[MNTFile], mop: Optional[MOPFile | KFMFile], name: str,
-               super_root: bpy.types.Object): pass
+               super_root: bpy.types.Object, shared: bool): pass

@@ -49,6 +49,8 @@ class NUDVertexStream:
 	normal: Optional[npt.NDArray]
 	color: Optional[npt.NDArray]
 	uv: list[npt.NDArray]
+	joints: Optional[npt.NDArray]
+	weights: Optional[npt.NDArray]
 
 	def __init__(self, nud: NUDFile, prim: NUDPrimitive): pass
 

@@ -34,6 +34,18 @@ class MNTFile:
 		for index in range(self.header.count):
 			self.nodes.append(MNTNode(stream, string_buffer[index].decode('ascii')))
 
+	@staticmethod
+	def determine_mnt_index(nud_index, nud_count, mnt_count):
+		if mnt_count == 0:
+			return 0
+		elif nud_count == mnt_count:
+			return nud_index
+		elif mnt_count == 1:
+			return 0
+		else:
+			nuds_per_mnt = nud_count // mnt_count
+			return nud_index // nuds_per_mnt
+
 
 if __name__ == '__main__':
 	import sys

@@ -7,9 +7,9 @@ from typing import Optional
 import bpy
 import mathutils
 
+from io_import_mage.format import MOPFile
 from io_import_mage.format.kfm import KFMNode
 from io_import_mage.format.structs.enums import KFMChannelTarget
-from io_import_mage.format import MOPFile
 
 
 def get_trans(node: Optional[KFMNode]) -> tuple[float, float, float]:
@@ -36,9 +36,14 @@ def get_rot(node: Optional[KFMNode]) -> tuple[float, float, float, float]:
 	return node.values[0][3], node.values[0][0], node.values[0][1], node.values[0][2]
 
 
-def create_skeleton(mnt, kfm, root):
+def create_skeleton(mnt, kfm, root, shared):
 	if not (mnt and mnt.valid):
 		return None, []
+
+	if shared:
+		blend_obj = bpy.data.objects.get(mnt.nodes[0].name)
+		if blend_obj and 'mage_bones' in blend_obj:
+			return blend_obj, blend_obj['mage_bones']
 
 	if isinstance(kfm, MOPFile):
 		kfm = kfm.load('basepose')
@@ -78,5 +83,6 @@ def create_skeleton(mnt, kfm, root):
 			edit_bone.parent = armature.edit_bones[bones[node.header.parent_index]]
 
 	bpy.ops.object.mode_set(mode='OBJECT')
+	blend_obj["mage_bones"] = bones
 
 	return blend_obj, bones

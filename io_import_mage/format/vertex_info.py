@@ -19,10 +19,7 @@ class NUDVertexGeometryType(Enum):
 
 class NUDVertexSkinType(Enum):
 	I0 = 0x0
-	I4W16 = 0x1
-	I4W32 = 0x2
-	I8W16 = 0x3
-	I8W32 = 0x4
+	I4W32 = 0x1
 
 
 class NUDVertexUVType(Enum):
@@ -42,7 +39,7 @@ class VertexStorageType(Enum):
 	RG16_FLOAT = 4,
 	RGB16_FLOAT = 5,
 	RGBA16_FLOAT = 6,
-	RGBA16_INT = 7,
+	RGBA32_INT = 7,
 
 
 class VertexSemanticType(Enum):
@@ -193,36 +190,11 @@ VERTEX_INFO = {
 	NUDVertexSkinType.I0: VertexInfo(
 		0x0, []
 	),
-	NUDVertexSkinType.I4W16: VertexInfo(
-		0x10,
-		[
-			VertexSemantic(0x0, VertexStorageType.RGBA16_INT, VertexSemanticType.BoneIndex),
-			VertexSemantic(0x8, VertexStorageType.RGBA16_FLOAT, VertexSemanticType.BoneWeight),
-		]
-	),
 	NUDVertexSkinType.I4W32: VertexInfo(
-		0x18,
-		[
-			VertexSemantic(0x0, VertexStorageType.RGBA16_INT, VertexSemanticType.BoneIndex),
-			VertexSemantic(0x8, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.BoneWeight),
-		]
-	),
-	NUDVertexSkinType.I8W16: VertexInfo(
 		0x20,
 		[
-			VertexSemantic(0x0, VertexStorageType.RGBA16_INT, VertexSemanticType.BoneIndex),
-			VertexSemantic(0x8, VertexStorageType.RGBA16_INT, VertexSemanticType.BoneIndex, index=1),
-			VertexSemantic(0x10, VertexStorageType.RGBA16_FLOAT, VertexSemanticType.BoneWeight),
-			VertexSemantic(0x18, VertexStorageType.RGBA16_FLOAT, VertexSemanticType.BoneWeight, index=1),
-		]
-	),
-	NUDVertexSkinType.I8W32: VertexInfo(
-		0x30,
-		[
-			VertexSemantic(0x0, VertexStorageType.RGBA16_INT, VertexSemanticType.BoneIndex),
-			VertexSemantic(0x8, VertexStorageType.RGBA16_INT, VertexSemanticType.BoneIndex, index=1),
+			VertexSemantic(0x0, VertexStorageType.RGBA32_INT, VertexSemanticType.BoneIndex),
 			VertexSemantic(0x10, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.BoneWeight),
-			VertexSemantic(0x20, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.BoneWeight, index=1),
 		]
 	),
 }

@@ -9,5 +9,5 @@ import bpy
 from io_import_mage.format import *
 
 
-def create_skeleton(mnt: Optional[MNTFile], kfm: Optional[MOPFile | KFMFile], root: bpy.types.Object) \
-		-> tuple[bpy.types.Object, list[str]]: pass
+def create_skeleton(mnt: Optional[MNTFile], kfm: Optional[MOPFile | KFMFile], root: bpy.types.Object,
+                    shared: bool) -> tuple[bpy.types.Object, list[str]]: pass

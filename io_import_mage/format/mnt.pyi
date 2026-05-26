@@ -20,3 +20,6 @@ class MNTFile:
 	nodes: list[MNTNode]
 
 	def __init__(self, stream: Optional[IO[bytes]]): pass
+
+	@staticmethod
+	def determine_mnt_index(nud_index: int, nud_count: int, mnt_count: int) -> int: pass

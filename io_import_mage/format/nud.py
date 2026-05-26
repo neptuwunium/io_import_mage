@@ -7,6 +7,7 @@ from ctypes import sizeof
 from typing import Optional
 
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 from io_import_mage.format import vertex_info
 from io_import_mage.format.structs.nud_struct import *
@@ -18,7 +19,7 @@ class NUDVertexType:
 		self.uv_type = NUDVertexUVType(value & 0xf)
 		self.uv_count = (value >> 4) & 0xf
 		self.geometry_type = NUDVertexGeometryType((value >> 8) & 0xf)
-		self.skin_type = NUDVertexSkinType((value >> 16) & 0xf)
+		self.skin_type = NUDVertexSkinType((value >> 12) & 0xf)
 
 
 class NUDShaderParam:
@@ -76,7 +77,7 @@ STORAGE_TO_NUMPY = {
 	VertexStorageType.RG16_FLOAT: '>2f2',
 	VertexStorageType.RGB16_FLOAT: '>3f2',
 	VertexStorageType.RGBA16_FLOAT: '>4f2',
-	VertexStorageType.RGBA16_INT: '>4u2',
+	VertexStorageType.RGBA32_INT: '>4u4',
 }
 
 
@@ -91,8 +92,6 @@ def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.ND
 			return array.astype(np.float32)
 		case VertexStorageType.RGBA16_FLOAT:
 			return array.astype(np.float32)
-		case VertexStorageType.RGBA16_INT:
-			return array.astype(np.int32)
 		case _:
 			return array
 
@@ -112,32 +111,39 @@ def normalize(array: np.typing.NDArray, only_drop: bool = True, fallback: Option
 class NUDVertexStream:
 	def __init__(self, nud, prim):
 		geo_info = vertex_info.VERTEX_INFO[prim.vertex_type.geometry_type]
+		skin_info = vertex_info.VERTEX_INFO[prim.vertex_type.skin_type]
+		has_skin = skin_info.stride > 0 and nud.header.skin_buffer_size > 0
 		uv_info = vertex_info.get_uv_info(vertex_info.VERTEX_INFO[prim.vertex_type.uv_type], prim.vertex_type.uv_count)
-		total_stride = geo_info.stride + uv_info.stride
+		total_stride = geo_info.stride + uv_info.stride if not has_skin else uv_info.stride
+		skin_stride = geo_info.stride + skin_info.stride if has_skin else 0
 
 		vertex_start = prim.header.vertex_offset
 		vertex_count = prim.header.vertex_count
 		vertex_end = vertex_start + vertex_count * total_stride
+
+		skin_vertex_start = prim.header.skin_vertex_offset
+		skin_vertex_end = skin_vertex_start + vertex_count * skin_stride
 
 		names = []
 		semantic_idx = []
 		formats = []
 		offsets = []
 
-		for element in geo_info.elements:
-			semantic = element.type
-			storage = element.storage
-			names.append(semantic.name)
-			formats.append(STORAGE_TO_NUMPY[storage])
-			offsets.append(element.offset)
-			semantic_idx.append(element)
+		if not has_skin:
+			for element in geo_info.elements:
+				semantic = element.type
+				storage = element.storage
+				names.append(semantic.name)
+				formats.append(STORAGE_TO_NUMPY[storage])
+				offsets.append(element.offset)
+				semantic_idx.append(element)
 
 		for element in uv_info.elements:
 			semantic = element.type
 			storage = element.storage
 			names.append(f'{semantic.name}{element.index}' if element.index > 0 else semantic.name)
 			formats.append(STORAGE_TO_NUMPY[storage])
-			offsets.append(element.offset + geo_info.stride)
+			offsets.append(element.offset + geo_info.stride if not has_skin else element.offset)
 			semantic_idx.append(element)
 
 		view = np.frombuffer(nud.vertex_buffer[vertex_start:vertex_end], dtype={
@@ -147,8 +153,38 @@ class NUDVertexStream:
 			'itemsize': total_stride
 		})
 
+		if has_skin:
+			start = len(semantic_idx)
+
+			for element in geo_info.elements:
+				semantic = element.type
+				storage = element.storage
+				names.append(semantic.name)
+				formats.append(STORAGE_TO_NUMPY[storage])
+				offsets.append(element.offset)
+				semantic_idx.append(element)
+
+			for element in skin_info.elements:
+				semantic = element.type
+				storage = element.storage
+				names.append(f'{semantic.name}{element.index}' if element.index > 0 else semantic.name)
+				formats.append(STORAGE_TO_NUMPY[storage])
+				offsets.append(element.offset + geo_info.stride)
+				semantic_idx.append(element)
+
+			skin_view = np.frombuffer(nud.skin_buffer[skin_vertex_start:skin_vertex_end], dtype={
+				'names': names[start:],
+				'formats': formats[start:],
+				'offsets': offsets[start:],
+				'itemsize': skin_stride
+			})
+
+			view = rfn.merge_arrays((view, skin_view), flatten=True, usemask=False)
+
 		self.normal = None
 		self.color = None
+		self.joints = None
+		self.weights = None
 
 		# noinspection PyTypeChecker
 		# reasoning: set to not null
@@ -166,6 +202,10 @@ class NUDVertexStream:
 					uv = unwrap(view[names[index]].copy(), semantic.storage)
 					uv[:, 1] = 1.0 - uv[:, 1]
 					self.uv[semantic.index] = uv
+				case VertexSemanticType.BoneIndex:
+					self.joints = unwrap(view[names[index]].copy(), semantic.storage)
+				case VertexSemanticType.BoneWeight:
+					self.weights = unwrap(view[names[index]].copy(), semantic.storage)
 
 
 class NUDTriangleStream:

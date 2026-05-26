@@ -95,9 +95,9 @@ OFFSET_RANGES = {
 	},
 	0x000a: {
 		MageFileType.Mesh: (0, 8),
-		MageFileType.Node: (8, 8),
+		MageFileType.Material: (8, 8),
 		MageFileType.ObjectInfo: (16, 8),
-		MageFileType.Material: (24, 1),
+		MageFileType.Node: (24, 1),
 		MageFileType.Motion: (25, 1),
 		MageFileType.Name: (26, 1),
 		MageFileType.PackInfo: (27, 1),
@@ -200,7 +200,12 @@ class MageFile:
 		if count == 0 or index >= count:
 			return None
 
-		return self.files[first_index + index]
+		file = self.files[first_index + index]
+		if file is None:
+			return None
+
+		file.seek(0)
+		return file
 
 	def get_count(self, file_type):
 		if file_type not in self.offset_ranges:
