@@ -7,7 +7,7 @@ from typing import Optional, IO
 import numpy as np
 import numpy.typing as npt
 
-from io_import_mage.format.nud_struct import *
+from io_import_mage.format.structs.nud_struct import *
 from io_import_mage.format.vertex_info import *
 
 

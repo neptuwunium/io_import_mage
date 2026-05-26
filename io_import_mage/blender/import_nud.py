@@ -62,7 +62,7 @@ def import_nud(nud, mnt, mop, name):
 
 			if has_weights:
 				# todo
-				print("skin streams are not supported yet")
+				print('skin streams are not supported yet')
 				# skin_vert = NUDSkinStream(nud, prim)
 				pass
 
@@ -104,21 +104,21 @@ def import_nud(nud, mnt, mop, name):
 
 		if material_indices:
 			mat_indices_cat = np.concatenate(material_indices)
-			mesh.polygons.foreach_set("material_index", mat_indices_cat)
+			mesh.polygons.foreach_set('material_index', mat_indices_cat)
 
 		loop_vert_indices = np.empty(len(mesh.loops), dtype=np.int32)
-		mesh.loops.foreach_get("vertex_index", loop_vert_indices)
+		mesh.loops.foreach_get('vertex_index', loop_vert_indices)
 
 		for index, uv_list in uvs.items():
 			combined_uvs = np.concatenate(uv_list)
 			loop_uvs = combined_uvs[loop_vert_indices]
 			layer = mesh.uv_layers.new(name=f'TEXCOORD_{index}')
-			layer.uv.foreach_set("vector", loop_uvs.flatten())
+			layer.uv.foreach_set('vector', loop_uvs.flatten())
 
 		if colors:
 			combined_colors = np.concatenate(colors)
-			layer = mesh.color_attributes.new("Color", 'FLOAT_COLOR', 'POINT')
-			layer.data.foreach_set("color", combined_colors.flatten())
+			layer = mesh.color_attributes.new('Color', 'FLOAT_COLOR', 'POINT')
+			layer.data.foreach_set('color', combined_colors.flatten())
 
 		mesh.update()
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
 			mage = MageFile(f)
 			nud_file = NUDFile(mage.get_mesh(0))
 			mnt_file = MNTFile(mage.get_node(0))
-			import_nud(nud_file, mnt_file, None, mage.name or "nud")
+			import_nud(nud_file, mnt_file, None, mage.name or 'nud')
 		else:
 			nud_file = NUDFile(f)
-			import_nud(nud_file, None, None, "nud")
+			import_nud(nud_file, None, None, 'nud')

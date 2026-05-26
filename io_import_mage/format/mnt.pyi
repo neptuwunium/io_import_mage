@@ -4,7 +4,7 @@
 
 from typing import Optional, IO
 
-from io_import_mage.format.mnt_struct import MNTHeader, MNTNodeHeader
+from io_import_mage.format.structs.mnt_struct import *
 
 
 class MNTNode:

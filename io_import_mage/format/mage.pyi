@@ -2,22 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from enum import Enum
 from io import BytesIO
 from typing import Optional, IO
 
-
-class MageFileType(Enum):
-	Mesh = 1
-	Node = 2
-	Motion = 3
-	Material = 4
-	Twist = 5
-	Collision = 6
-	Name = 7
-	ObjectInfo = 8
-	PackInfo = 9
-	ActorInfo = 10
+from io_import_mage.format.structs.enums import MageFileType
 
 
 class MageFile:

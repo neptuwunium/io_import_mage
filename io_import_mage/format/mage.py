@@ -2,23 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from enum import Enum
 from io import BytesIO
-from struct import unpack
+from ctypes import sizeof
 
-
-class MageFileType(Enum):
-	Mesh = 1
-	Node = 2
-	Motion = 3
-	Material = 4
-	Twist = 5
-	Collision = 6
-	Name = 7
-	ObjectInfo = 8
-	PackInfo = 9
-	ActorInfo = 10
-
+from io_import_mage.format.structs.mage_struct import *
+from io_import_mage.format.structs.enums import MageFileType
 
 OFFSET_RANGES = {
 	0x0000: {
@@ -170,30 +158,28 @@ OFFSET_RANGES = {
 
 class MageFile:
 	def __init__(self, stream):
-		(magic, major, minor, patch, is_big, table_offset, count, _, type_id, game_id, name_length) = (
-			unpack('=IBBB?iiiiIi', stream.read(0x20))
-		)
-		assert magic == 0x4547414D
-		assert type_id in OFFSET_RANGES
-		assert is_big
+		header = MAGEHeader.from_buffer_copy(stream.read(sizeof(MAGEHeader)))
+		assert header.magic == 0x4547414D
+		assert header.type_id in OFFSET_RANGES
+		assert header.is_big
 
-		self.version = major << 16 | minor << 8 | patch
-		self.is_big = is_big
-		self.game_id = game_id
-		self.type_id = type_id
-		self.count = count
+		self.version = header.version_major << 16 | header.version_minor << 8 | header.version_patch
+		self.is_big = header.is_big
+		self.game_id = header.game_id
+		self.type_id = header.type_id
+		self.count = header.count
 		self.files = []
-		self.offset_ranges = OFFSET_RANGES[type_id]
-		self.name = stream.read(name_length).decode('ascii') if name_length > 0 else None
+		self.offset_ranges = OFFSET_RANGES[self.type_id]
+		self.name = stream.read(header.name_length).decode('ascii') if header.name_length > 0 else None
 
-		stream.seek(table_offset)
+		stream.seek(header.table_offset)
 
-		for _ in range(count):
-			(offset, size) = unpack('=ii', stream.read(0x8))
-			if size > 0:
+		for _ in range(header.count):
+			ptr = MAGEPtr.from_buffer_copy(stream.read(sizeof(MAGEPtr)))
+			if ptr.size > 0:
 				next_entry = stream.tell()
-				stream.seek(offset)
-				self.files.append(BytesIO(stream.read(size)))
+				stream.seek(ptr.offset)
+				self.files.append(BytesIO(stream.read(ptr.size)))
 				stream.seek(next_entry)
 			else:
 				self.files.append(None)

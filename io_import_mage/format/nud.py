@@ -7,10 +7,8 @@ from ctypes import sizeof
 
 import numpy as np
 
-from io_import_mage.format.nud_struct import *
-from io_import_mage.format.vertex_info import NUDVertexUVType, NUDVertexGeometryType, NUDVertexSkinType, \
-	VertexStorageType, \
-	VertexSemanticType
+from io_import_mage.format.structs.nud_struct import *
+from io_import_mage.format.vertex_info import *
 from . import vertex_info
 
 
