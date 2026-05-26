@@ -17,14 +17,13 @@ def create_material(name):
 	return bpy.data.materials.new(name=name)
 
 
-def import_nud(nud, mnt, mop, name):
+def import_nud(nud, mnt, mop, name, super_root):
 	if not nud.valid: return
 
-	root = bpy.data.objects.new(name, None)
-	root.rotation_euler = (math.pi / 2, 0, 0)
-	(skeleton, bones) = create_skeleton(mnt, mop, root)
+	(root, bones) = create_skeleton(mnt, mop, super_root)
+	if not root:
+		root = super_root
 	bone_count = len(bones)
-	bpy.context.view_layer.active_layer_collection.collection.objects.link(root)
 
 	for obj in nud.objects:
 		positions = []
@@ -38,7 +37,7 @@ def import_nud(nud, mnt, mop, name):
 
 		mesh = bpy.data.meshes.new(obj.name)
 		blend_obj = bpy.data.objects.new(obj.name, mesh)
-		blend_obj.parent = skeleton or root
+		blend_obj.parent = root
 
 		has_weights = False
 		for prim in obj.primitives:
@@ -48,11 +47,11 @@ def import_nud(nud, mnt, mop, name):
 
 		if has_weights:
 			armature = blend_obj.modifiers.new('ARMATURE')
-			armature.object = skeleton
+			armature.object = root
 		elif obj.header.mnt_index < bone_count:
 			copy_transforms = blend_obj.constraints.new('COPY_TRANSFORMS')
 			copy_transforms.mix_mode = 'REPLACE'
-			copy_transforms.target = skeleton
+			copy_transforms.target = root
 			copy_transforms.target_space = 'POSE'
 			copy_transforms.owner_space = 'LOCAL'
 			copy_transforms.subtarget = bones[obj.header.mnt_index]
@@ -140,14 +139,19 @@ if __name__ == '__main__':
 	from io_import_mage.format import *
 	from io_import_mage.format.structs.enums import MageFileType
 
+	nud_root = bpy.data.objects.new("NUD", None)
+	nud_root.rotation_euler = (math.pi / 2, 0, 0)
+	bpy.context.collection.objects.link(nud_root)
+
 	with open(sys.argv[-1], 'rb') as f:
 		if sys.argv[-1].endswith('.mage'):
 			with MageFile(f) as mage:
+				nud_root.name = mage.name
 				for index in range(mage.get_count(MageFileType.Mesh)):
 					nud_file = NUDFile(mage.get_mesh(index))
 					if not nud_file.valid: continue
 					mnt_file = MNTFile(mage.get_node(index))
 					with MOPFile(mage.get_motion(index)) as mop_file:
-						import_nud(nud_file, mnt_file, mop_file, mage.name or 'nud')
+						import_nud(nud_file, mnt_file, mop_file, mage.name or 'nud', nud_root)
 		else:
-			import_nud(NUDFile(f), None, None, 'nud')
+			import_nud(NUDFile(f), None, None, 'nud', nud_root)
