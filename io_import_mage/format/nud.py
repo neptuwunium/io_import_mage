@@ -8,9 +8,9 @@ from typing import Optional
 
 import numpy as np
 
+from io_import_mage.format import vertex_info
 from io_import_mage.format.structs.nud_struct import *
 from io_import_mage.format.vertex_info import *
-from io_import_mage.format import vertex_info
 
 
 class NUDVertexType:
@@ -96,6 +96,7 @@ def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.ND
 		case _:
 			return array
 
+
 def normalize(array: np.typing.NDArray, only_drop: bool = True, fallback: Optional[float] = None, rescale: float = 1.0):
 	if array.shape[1] != 4:
 		if only_drop or fallback is None: return array
@@ -105,6 +106,7 @@ def normalize(array: np.typing.NDArray, only_drop: bool = True, fallback: Option
 		multiplier = array[:, 3:]
 
 	return array[:, :3] * multiplier * rescale
+
 
 # todo: copy this for NUDSkinVertexStream, but need to construct the armature first from MOP and MNT :)
 class NUDVertexStream:

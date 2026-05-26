@@ -6,11 +6,13 @@ from ctypes import BigEndianStructure
 
 from io_import_mage.format.structs.enums import KFMChannel
 
+
 class KFMFrameNode(BigEndianStructure):
 	frame_count: int
 	compress_bit_index: int
 	frame_id_index: int
 	value_index: int
+
 
 class KFMFrame(BigEndianStructure):
 	magic: int
@@ -18,9 +20,11 @@ class KFMFrame(BigEndianStructure):
 	value_offset: int
 	compress_offset: int
 
+
 class KFMPtr(BigEndianStructure):
 	size: int
 	offset: int
+
 
 class KFMNode(BigEndianStructure):
 	hash: int
@@ -39,6 +43,7 @@ class KFMNode(BigEndianStructure):
 
 	@property
 	def channel(self) -> KFMChannel: pass
+
 
 class KFMHeader(BigEndianStructure):
 	magic: int

@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from ctypes import sizeof
 import struct
+from ctypes import sizeof
 from io import BytesIO
 
-from io_import_mage.format.structs.mop_struct import *
 from io_import_mage.format.kfm import KFMFile
+from io_import_mage.format.structs.mop_struct import *
 
 
 class MOPFile:
@@ -36,7 +36,7 @@ class MOPFile:
 		name_offsets = struct.unpack(f'>{self.header.count}I', stream.read(4 * self.header.count))
 
 		stream.seek(0)
-		string_buffer = stream.read(offsets[0]) # this should be header_size, but it's bugged!
+		string_buffer = stream.read(offsets[0])  # this should be header_size, but it's bugged!
 
 		for (size, offset, name_offset) in zip(sizes, offsets, name_offsets):
 			stream.seek(name_offset)
@@ -44,12 +44,12 @@ class MOPFile:
 			stream.seek(offset)
 			self.animations[name] = BytesIO(stream.read(size))
 
-	def __enter__(self): return self
+	def __enter__(self):
+		return self
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		for anim in self.animations.values():
 			anim.close()
-
 
 	def load(self, name):
 		if name not in self.animations:
@@ -71,4 +71,3 @@ if __name__ == '__main__':
 		else:
 			with MOPFile(f) as mop_file:
 				print(mop_file)
-

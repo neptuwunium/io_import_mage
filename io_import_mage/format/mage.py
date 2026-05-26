@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from io import BytesIO
 from ctypes import sizeof
+from io import BytesIO
 
-from io_import_mage.format.structs.mage_struct import *
 from io_import_mage.format.structs.enums import MageFileType
+from io_import_mage.format.structs.mage_struct import *
 
 OFFSET_RANGES = {
 	0x0000: {
@@ -184,13 +184,13 @@ class MageFile:
 			else:
 				self.files.append(None)
 
-	def __enter__(self): return self
+	def __enter__(self):
+		return self
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		for tmp in self.files:
 			if tmp is None: continue
 			tmp.close()
-
 
 	def get_file(self, file_type, index):
 		if file_type not in self.offset_ranges:
@@ -208,7 +208,6 @@ class MageFile:
 
 		(_, count) = self.offset_ranges[file_type]
 		return count
-
 
 	def get_mesh(self, index):
 		return self.get_file(MageFileType.Mesh, index)

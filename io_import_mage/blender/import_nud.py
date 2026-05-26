@@ -130,6 +130,7 @@ def import_nud(nud, mnt, mop, name):
 
 	bpy.context.view_layer.update()
 
+
 if __name__ == '__main__':
 	import sys
 	from io_import_mage.format import *

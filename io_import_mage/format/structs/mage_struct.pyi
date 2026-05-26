@@ -4,6 +4,7 @@
 
 from ctypes import BigEndianStructure
 
+
 class MAGEHeader(BigEndianStructure):
 	magic: int
 	version_major: int

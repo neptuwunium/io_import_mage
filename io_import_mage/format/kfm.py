@@ -19,7 +19,7 @@ class KFMFile:
 		assert self.header.version_major == 2
 		assert self.header.version_minor == 3
 
-		# todo
+	# todo
 
 
 if __name__ == '__main__':

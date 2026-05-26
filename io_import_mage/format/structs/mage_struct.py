@@ -4,6 +4,7 @@
 
 from ctypes import LittleEndianStructure, c_uint, c_int, c_bool, c_byte
 
+
 class MAGEHeader(LittleEndianStructure):
 	_pack_ = 1
 	_fields_ = [
@@ -19,6 +20,7 @@ class MAGEHeader(LittleEndianStructure):
 		('game_id', c_uint),
 		('name_length', c_uint),
 	]
+
 
 class MAGEPtr(LittleEndianStructure):
 	_pack_ = 1

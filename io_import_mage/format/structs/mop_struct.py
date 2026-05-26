@@ -4,6 +4,7 @@
 
 from ctypes import BigEndianStructure, c_uint, c_int, c_ushort
 
+
 class MOPHeader(BigEndianStructure):
 	_pack_ = 1
 	_fields_ = [
