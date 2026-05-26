@@ -15,11 +15,13 @@ bl_info = {
 	'category': 'Import-Export'
 }
 
+import io_import_mage.blender
 
-def register(): pass
+
+def register(): io_import_mage.blender.register()
 
 
-def unregister(): pass
+def unregister(): io_import_mage.blender.unregister()
 
 
 if __name__ == '__main__':
