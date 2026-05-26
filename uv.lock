@@ -99,6 +99,15 @@ wheels = [
 ]
 
 [[package]]
+name = "fake-bpy-module"
+version = "20260501"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/15/cc/386fe67fc1e4406f915e2ca8dee6ef4fdf4846438d89e212bb420a7f2f24/fake_bpy_module-20260501.tar.gz", hash = "sha256:ff96946f8fc1592742e9a3379e3b289beb5443df7704a6f4500ba83f4ce108c7", size = 899538, upload-time = "2026-05-01T08:02:12.68Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d6/54/4a5e80073c6a194852100a020dfbcbddcb80d46e4c878547ab51b5508006/fake_bpy_module-20260501-py3-none-any.whl", hash = "sha256:7bf96430c7794ad6cbe265791d9b042b07d3104c3e5c8476f8e800fc32af0e08", size = 1044612, upload-time = "2026-05-01T08:02:10.903Z" },
+]
+
+[[package]]
 name = "idna"
 version = "3.16"
 source = { registry = "https://pypi.org/simple" }
@@ -111,19 +120,36 @@ wheels = [
 name = "io-import-mage"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "mathutils" },
+]
 
 [package.dev-dependencies]
 dev = [
     { name = "bpy" },
+    { name = "fake-bpy-module" },
+    { name = "mathutils" },
     { name = "numpy" },
 ]
 
 [package.metadata]
+requires-dist = [{ name = "mathutils", specifier = ">=5.1.0" }]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "bpy", specifier = "==5.1.2", index = "https://download.blender.org/pypi/" },
+    { name = "fake-bpy-module" },
+    { name = "mathutils", specifier = "==5.1.0" },
     { name = "numpy", specifier = ">=2.4.6" },
+]
+
+[[package]]
+name = "mathutils"
+version = "5.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/74/57/1b9ca6d44e0a79bac7702cd433191b58b6071d4b5167064c28a0e74e0402/mathutils-5.1.0.tar.gz", hash = "sha256:b171af9d6b54a12138c9dead4f5930a3faaf92387cc5ffaa82f18fbee1554168", size = 350638, upload-time = "2026-02-25T04:26:13.992Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/eb/4a/0a8b52b63f5bfd0e2d7b842014ac1d6df47fea57337a0d739f18cf502942/mathutils-5.1.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:77469262f83c976008fa8ed3e09a3e8ad95701058a8e3384116ac4f398daaaa9", size = 2655860, upload-time = "2026-02-25T04:26:36.149Z" },
 ]
 
 [[package]]

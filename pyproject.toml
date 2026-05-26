@@ -11,6 +11,8 @@ requires-python = "==3.13.*"
 dev = [
     "numpy>=2.4.6",
     "bpy==5.1.2",
+    "mathutils==5.1.0",
+    "fake-bpy-module",
 ]
 
 [tool.uv.sources]

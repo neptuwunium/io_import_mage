@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import bpy
+import math
 import numpy as np
 
 from io_import_mage.blender.import_mnt import create_skeleton
@@ -20,6 +21,7 @@ def import_nud(nud, mnt, mop, name):
 	if not nud.valid: return
 
 	root = bpy.data.objects.new(name, None)
+	root.rotation_euler = (math.pi / 2, 0, 0)
 	(skeleton, bones) = create_skeleton(mnt, mop, root)
 	bone_count = len(bones)
 	bpy.context.view_layer.active_layer_collection.collection.objects.link(root)
@@ -51,6 +53,8 @@ def import_nud(nud, mnt, mop, name):
 			copy_transforms = blend_obj.constraints.new('COPY_TRANSFORMS')
 			copy_transforms.mix_mode = 'REPLACE'
 			copy_transforms.target = skeleton
+			copy_transforms.target_space = 'POSE'
+			copy_transforms.owner_space = 'LOCAL'
 			copy_transforms.subtarget = bones[obj.header.mnt_index]
 
 		for prim_idx, prim in enumerate(obj.primitives):

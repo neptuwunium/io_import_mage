@@ -2,9 +2,38 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import bpy
+from typing import Optional
 
-from io_import_mage.format import KFMFile, MOPFile
+import bpy
+import mathutils
+
+from io_import_mage.format.kfm import KFMNode
+from io_import_mage.format.structs.enums import KFMChannelTarget
+from io_import_mage.format import MOPFile
+
+
+def get_trans(node: Optional[KFMNode]) -> tuple[float, float, float]:
+	if not node or len(node.values) == 0:
+		return 0, 0, 0
+
+	# noinspection PyTypeChecker
+	return tuple(node.values[0])
+
+
+def get_scale(node: Optional[KFMNode]) -> tuple[float, float, float]:
+	if not node or len(node.values) == 0:
+		return 1, 1, 1
+
+	# noinspection PyTypeChecker
+	return tuple(node.values[0])
+
+
+def get_rot(node: Optional[KFMNode]) -> tuple[float, float, float, float]:
+	if not node or len(node.values) == 0:
+		return 1, 0, 0, 0
+
+	# noinspection PyTypeChecker
+	return node.values[0][3], node.values[0][0], node.values[0][1], node.values[0][2]
 
 
 def create_skeleton(mnt, kfm, root):
@@ -13,8 +42,6 @@ def create_skeleton(mnt, kfm, root):
 
 	if isinstance(kfm, MOPFile):
 		kfm = kfm.load('basepose')
-
-	assert isinstance(kfm, KFMFile)
 
 	armature = bpy.data.armatures.new(mnt.nodes[0].name)
 	blend_obj = bpy.data.objects.new(mnt.nodes[0].name, armature)
@@ -30,19 +57,25 @@ def create_skeleton(mnt, kfm, root):
 	for node in mnt.nodes:
 		edit_bone = armature.edit_bones.new(node.name)
 
-		if kfm and kfm.valid:
-			pass
-		else:
-			edit_bone.head = (0, 0, 0)
-			edit_bone.tail = (0, 0, 0.1)
+		edit_bone.head = (0, 0, 0)
+		edit_bone.tail = (0, 1, 0)
+
+		if kfm and kfm.valid and node.header.index in kfm.nodes:
+			kfm_node = kfm.nodes[node.header.index]
+			node_trans = get_trans(kfm_node.get(KFMChannelTarget.Translation))
+			node_rot = get_rot(kfm_node.get(KFMChannelTarget.Rotation))
+			node_scale = get_scale(kfm_node.get(KFMChannelTarget.Scale))
+
+			loc = mathutils.Vector(node_trans)
+			rot = mathutils.Quaternion(node_rot)
+			scale = mathutils.Vector(node_scale)
+
+			edit_bone.matrix = mathutils.Matrix.LocRotScale(loc, rot, scale)
+
 		bones.append(edit_bone.name)
 
 		if node.header.parent_index != 0xffff:
 			edit_bone.parent = armature.edit_bones[bones[node.header.parent_index]]
-
-	if kfm:
-		# prettify_bones
-		pass
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
