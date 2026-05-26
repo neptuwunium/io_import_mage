@@ -4,14 +4,14 @@
 
 from ctypes import BigEndianStructure
 
-from io_import_mage.format.structs.enums import KFMChannel
+from io_import_mage.format.structs.enums import KFMChannelStorage, KFMChannelTarget
 
 
 class KFMFrameNode(BigEndianStructure):
 	frame_count: int
 	compress_bit_index: int
 	frame_id_index: int
-	value_index: int
+	value_offset: int
 
 
 class KFMFrame(BigEndianStructure):
@@ -26,11 +26,11 @@ class KFMPtr(BigEndianStructure):
 	offset: int
 
 
-class KFMNode(BigEndianStructure):
+class KFMNodeHeader(BigEndianStructure):
 	hash: int
 	id: int
 	mnt_id: int
-	_channel: KFMChannel
+	_channel: int
 	count: int
 	id2: int
 	frame_node_offset: int
@@ -42,7 +42,10 @@ class KFMNode(BigEndianStructure):
 	reserved3: int
 
 	@property
-	def channel(self) -> KFMChannel: pass
+	def channel(self) -> KFMChannelStorage: pass
+
+	@property
+	def target(self) -> KFMChannelTarget: pass
 
 
 class KFMHeader(BigEndianStructure):

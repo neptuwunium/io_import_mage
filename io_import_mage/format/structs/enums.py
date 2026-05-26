@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Neptuwunium
 #
 # SPDX-License-Identifier: EUPL-1.2
-
+import enum
 from enum import Enum
 
 
-class KFMChannel(Enum):
+class KFMChannelStorage(Enum):
 	FLOAT32 = 0x0  # size 4
 	VEC2F = 0x1  # size 4 (2 elements)
 	VEC3F = 0x2  # size 4 (3 elements)
@@ -19,6 +19,13 @@ class KFMChannel(Enum):
 	ROTATION15 = 0xa  # size 6 (1 element)
 	ROTATION10 = 0xb  # size 4 (1 element)
 	ROTATION16 = 0xc  # size 2 (4 elements)
+
+
+class KFMChannelTarget(Enum):
+	Property = enum.auto()
+	Scale = enum.auto()
+	Translation = enum.auto()
+	Rotation = enum.auto()
 
 
 class MageFileType(Enum):

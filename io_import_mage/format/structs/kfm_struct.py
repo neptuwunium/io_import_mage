@@ -4,7 +4,8 @@
 
 from ctypes import BigEndianStructure, c_uint, c_int, c_byte, c_ushort
 
-from io_import_mage.format.structs.enums import KFMChannel
+from io_import_mage.format.structs.enums import KFMChannelStorage
+from io_import_mage.format.structs.enums import KFMChannelTarget
 
 
 class KFMFrameNode(BigEndianStructure):
@@ -13,7 +14,7 @@ class KFMFrameNode(BigEndianStructure):
 		('frame_count', c_ushort),
 		('compress_bit_index', c_ushort),
 		('frame_id_index', c_ushort),
-		('value_index', c_ushort),
+		('value_offset', c_ushort),
 	]
 
 
@@ -35,7 +36,7 @@ class KFMPtr(BigEndianStructure):
 	]
 
 
-class KFMNode(BigEndianStructure):
+class KFMNodeHeader(BigEndianStructure):
 	_pack_ = 1
 	_fields_ = [
 		('hash', c_uint),
@@ -55,7 +56,25 @@ class KFMNode(BigEndianStructure):
 
 	@property
 	def channel(self):
-		return KFMChannel(self._channel)
+		return KFMChannelStorage(self._channel)
+
+	@property
+	def target(self):
+		match self.channel:
+			case KFMChannelStorage.FLOAT32:
+				return KFMChannelTarget.Property
+			case KFMChannelStorage.VEC2F:
+				return KFMChannelTarget.Property
+			case KFMChannelStorage.VEC3F:
+				return KFMChannelTarget.Property
+			case KFMChannelStorage.VEC4F:
+				return KFMChannelTarget.Property
+			case KFMChannelStorage.SCALE32:
+				return KFMChannelTarget.Scale
+			case KFMChannelStorage.TRANSLATION32:
+				return KFMChannelTarget.Translation
+			case _:
+				return KFMChannelTarget.Rotation
 
 
 class KFMHeader(BigEndianStructure):
