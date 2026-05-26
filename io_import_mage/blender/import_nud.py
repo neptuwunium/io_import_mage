@@ -102,7 +102,7 @@ def import_nud(nud, mnt, mop, name, super_root):
 		positions_cat = np.concatenate(positions)
 		triangles_cat = np.concatenate(triangles)
 
-		mesh.from_pydata(positions_cat, [], triangles_cat, shade_flat=False)
+		mesh.from_pydata(positions_cat, [], triangles_cat, shade_flat=True)
 		bpy.context.view_layer.active_layer_collection.collection.objects.link(blend_obj)
 
 		if material_indices:
