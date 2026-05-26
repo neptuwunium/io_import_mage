@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from io import BytesIO
+from types import TracebackType
 from typing import Optional, IO
 
 from io_import_mage.format.structs.enums import MageFileType
@@ -20,11 +21,21 @@ class MageFile:
 
 	def __init__(self, stream: IO[bytes]): pass
 
+	def __enter__(self) -> MageFile: pass
+
+	def __exit__(
+			self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
+	) -> None: pass
+
 	def get_file(self, file_type: MageFileType, index: int) -> Optional[BytesIO]: pass
+
+	def get_count(self, file_type: MageFileType) -> int:
 
 	def get_mesh(self, index: int) -> Optional[BytesIO]: pass
 
 	def get_node(self, index: int) -> Optional[BytesIO]: pass
+
+	def get_motion(self, index: int) -> Optional[BytesIO]: pass
 
 	def get_material(self, index: int) -> Optional[BytesIO]: pass
 

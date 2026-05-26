@@ -184,6 +184,14 @@ class MageFile:
 			else:
 				self.files.append(None)
 
+	def __enter__(self): return self
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		for tmp in self.files:
+			if tmp is None: continue
+			tmp.close()
+
+
 	def get_file(self, file_type, index):
 		if file_type not in self.offset_ranges:
 			return None
@@ -194,11 +202,22 @@ class MageFile:
 
 		return self.files[first_index + index]
 
+	def get_count(self, file_type):
+		if file_type not in self.offset_ranges:
+			return 0
+
+		(_, count) = self.offset_ranges[file_type]
+		return count
+
+
 	def get_mesh(self, index):
 		return self.get_file(MageFileType.Mesh, index)
 
 	def get_node(self, index):
 		return self.get_file(MageFileType.Node, index)
+
+	def get_motion(self, index):
+		return self.get_file(MageFileType.Motion, index)
 
 	def get_material(self, index):
 		return self.get_file(MageFileType.Material, index)
@@ -226,4 +245,5 @@ if __name__ == '__main__':
 	import sys
 
 	with open(sys.argv[1], 'rb') as f:
-		file = MageFile(f)
+		with MageFile(f) as mage_file:
+			print(mage_file)

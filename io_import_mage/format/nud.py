@@ -255,9 +255,9 @@ if __name__ == '__main__':
 		if sys.argv[1].endswith('.mage'):
 			from io_import_mage.format.mage import MageFile
 
-			nud_file = NUDFile(MageFile(f).get_mesh(0))
+			with MageFile(f) as mage_file:
+				nud_file = NUDFile(mage_file.get_mesh(0))
+				print(nud_file)
 		else:
 			nud_file = NUDFile(f)
-
-		vert = NUDVertexStream(nud_file, nud_file.objects[0].primitives[0])
-		tri = NUDTriangleStream(nud_file, nud_file.objects[0].primitives[0])
+			print(nud_file)

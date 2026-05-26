@@ -42,6 +42,9 @@ if __name__ == '__main__':
 		if sys.argv[1].endswith('.mage'):
 			from io_import_mage.format.mage import MageFile
 
-			nud_file = MNTFile(MageFile(f).get_node(0))
+			with MageFile(f) as mage_file:
+				mnt_file = MNTFile(mage_file.get_node(0))
+				print(mnt_file)
 		else:
-			nud_file = MNTFile(f)
+			mnt_file = MNTFile(f)
+			print(mnt_file)
