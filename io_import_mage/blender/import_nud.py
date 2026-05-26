@@ -83,10 +83,10 @@ def import_nud(nud, mnt, mop, name):
 
 			material_indices.append(np.full(len(tri.triangles), material_idx, dtype=np.int32))
 
-			for index in range(len(vert.uv)):
-				if index not in uvs:
-					uvs[index] = []
-				uvs[index].append(vert.uv[index])
+			for uv_index in range(len(vert.uv)):
+				if uv_index not in uvs:
+					uvs[uv_index] = []
+				uvs[uv_index].append(vert.uv[uv_index])
 
 			if vert.color is not None:
 				colors.append(vert.color)
@@ -99,7 +99,7 @@ def import_nud(nud, mnt, mop, name):
 		positions_cat = np.concatenate(positions)
 		triangles_cat = np.concatenate(triangles)
 
-		mesh.from_pydata(positions_cat, [], triangles_cat)
+		mesh.from_pydata(positions_cat, [], triangles_cat, shade_flat=False)
 		bpy.context.view_layer.active_layer_collection.collection.objects.link(blend_obj)
 
 		if material_indices:
@@ -109,10 +109,10 @@ def import_nud(nud, mnt, mop, name):
 		loop_vert_indices = np.empty(len(mesh.loops), dtype=np.int32)
 		mesh.loops.foreach_get('vertex_index', loop_vert_indices)
 
-		for index, uv_list in uvs.items():
+		for uv_index, uv_list in uvs.items():
 			combined_uvs = np.concatenate(uv_list)
 			loop_uvs = combined_uvs[loop_vert_indices]
-			layer = mesh.uv_layers.new(name=f'TEXCOORD_{index}')
+			layer = mesh.uv_layers.new(name=f'TEXCOORD_{uv_index}')
 			layer.uv.foreach_set('vector', loop_uvs.flatten())
 
 		if colors:
@@ -130,18 +130,19 @@ def import_nud(nud, mnt, mop, name):
 
 	bpy.context.view_layer.update()
 
-
 if __name__ == '__main__':
 	import sys
 	from io_import_mage.format import *
+	from io_import_mage.format.structs.enums import MageFileType
 
 	with open(sys.argv[-1], 'rb') as f:
 		if sys.argv[-1].endswith('.mage'):
-
-			mage = MageFile(f)
-			nud_file = NUDFile(mage.get_mesh(0))
-			mnt_file = MNTFile(mage.get_node(0))
-			import_nud(nud_file, mnt_file, None, mage.name or 'nud')
+			with MageFile(f) as mage:
+				for index in range(mage.get_count(MageFileType.Mesh)):
+					nud_file = NUDFile(mage.get_mesh(index))
+					if not nud_file.valid: continue
+					mnt_file = MNTFile(mage.get_node(index))
+					with MOPFile(mage.get_motion(index)) as mop_file:
+						import_nud(nud_file, mnt_file, mop_file, mage.name or 'nud')
 		else:
-			nud_file = NUDFile(f)
-			import_nud(nud_file, None, None, 'nud')
+			import_nud(NUDFile(f), None, None, 'nud')

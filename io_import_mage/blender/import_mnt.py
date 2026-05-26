@@ -4,13 +4,17 @@
 
 import bpy
 
+from io_import_mage.format import KFMFile, MOPFile
 
-def create_skeleton(mnt, mop, root):
+
+def create_skeleton(mnt, kfm, root):
 	if not (mnt and mnt.valid):
 		return None, []
 
-	# if not (mop and mop.valid):
-	# 	return None, []
+	if isinstance(kfm, MOPFile):
+		kfm = kfm.load('basepose')
+
+	assert isinstance(kfm, KFMFile)
 
 	armature = bpy.data.armatures.new(mnt.nodes[0].name)
 	blend_obj = bpy.data.objects.new(mnt.nodes[0].name, armature)
@@ -25,12 +29,20 @@ def create_skeleton(mnt, mop, root):
 
 	for node in mnt.nodes:
 		edit_bone = armature.edit_bones.new(node.name)
-		edit_bone.head = (0, 0, 0)  # todo: get position from mop
-		edit_bone.tail = (0, 0, 0.1)  # todo: fortune bone calculation from gltf
+
+		if kfm and kfm.valid:
+			pass
+		else:
+			edit_bone.head = (0, 0, 0)
+			edit_bone.tail = (0, 0, 0.1)
 		bones.append(edit_bone.name)
 
 		if node.header.parent_index != 0xffff:
 			edit_bone.parent = armature.edit_bones[bones[node.header.parent_index]]
+
+	if kfm:
+		# prettify_bones
+		pass
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 

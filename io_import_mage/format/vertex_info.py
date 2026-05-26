@@ -83,31 +83,31 @@ VERTEX_INFO = {
 	NUDVertexGeometryType.P32: VertexInfo(
 		0x10,
 		[
-			VertexSemantic(0x0, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Position),
+			VertexSemantic(0x0, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Position),
 		]
 	),
 	NUDVertexGeometryType.P32N32: VertexInfo(
 		0x20,
 		[
-			VertexSemantic(0x0, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Position),
+			VertexSemantic(0x0, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Position),
 			VertexSemantic(0x10, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Normal),
 		]
 	),
 	NUDVertexGeometryType.P32NB32: VertexInfo(
 		0x30,
 		[
-			VertexSemantic(0x0, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Position),
-			VertexSemantic(0x10, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Normal),
-			VertexSemantic(0x20, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Binormal),
+			VertexSemantic(0x0, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Position),
+			VertexSemantic(0x10, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Normal),
+			VertexSemantic(0x20, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Binormal),
 		]
 	),
 	NUDVertexGeometryType.P32NBT32: VertexInfo(
 		0x40,
 		[
-			VertexSemantic(0x0, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Position),
-			VertexSemantic(0x10, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Normal),
-			VertexSemantic(0x20, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Binormal),
-			VertexSemantic(0x30, VertexStorageType.RGB32_FLOAT, VertexSemanticType.Tangent),
+			VertexSemantic(0x0, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Position),
+			VertexSemantic(0x10, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Normal),
+			VertexSemantic(0x20, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Binormal),
+			VertexSemantic(0x30, VertexStorageType.RGBA32_FLOAT, VertexSemanticType.Tangent),
 		]
 	),
 	# todo: N11/NBT11 is R11G11B10 (i think) but this is ass to implement in numpy

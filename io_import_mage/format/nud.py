@@ -4,18 +4,19 @@
 
 import struct
 from ctypes import sizeof
+from typing import Optional
 
 import numpy as np
 
 from io_import_mage.format.structs.nud_struct import *
 from io_import_mage.format.vertex_info import *
-from . import vertex_info
+from io_import_mage.format import vertex_info
 
 
 class NUDVertexType:
 	def __init__(self, value):
-		self.uv_count = value & 0xf
-		self.uv_type = NUDVertexUVType((value >> 4) & 0xf)
+		self.uv_type = NUDVertexUVType(value & 0xf)
+		self.uv_count = (value >> 4) & 0xf
 		self.geometry_type = NUDVertexGeometryType((value >> 8) & 0xf)
 		self.skin_type = NUDVertexSkinType((value >> 16) & 0xf)
 
@@ -95,6 +96,15 @@ def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.ND
 		case _:
 			return array
 
+def normalize(array: np.typing.NDArray, only_drop: bool = True, fallback: Optional[float] = None, rescale: float = 1.0):
+	if array.shape[1] != 4:
+		if only_drop or fallback is None: return array
+		multiplier = fallback
+	else:
+		if only_drop: return array[:, :3]
+		multiplier = array[:, 3:]
+
+	return array[:, :3] * multiplier * rescale
 
 # todo: copy this for NUDSkinVertexStream, but need to construct the armature first from MOP and MNT :)
 class NUDVertexStream:
@@ -145,9 +155,9 @@ class NUDVertexStream:
 			semantic = semantic_idx[index]
 			match semantic.type:
 				case VertexSemanticType.Position:
-					self.position = unwrap(view[names[index]].copy(), semantic.storage)
+					self.position = normalize(unwrap(view[names[index]].copy(), semantic.storage), False, 0.01, 100.0)
 				case VertexSemanticType.Normal:
-					self.normal = unwrap(view[names[index]].copy(), semantic.storage)
+					self.normal = normalize(unwrap(view[names[index]].copy(), semantic.storage))
 				case VertexSemanticType.Color:
 					self.color = unwrap(view[names[index]].copy(), semantic.storage)
 				case VertexSemanticType.UV:
