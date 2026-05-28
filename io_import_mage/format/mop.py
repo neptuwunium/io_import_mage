@@ -6,7 +6,7 @@ import struct
 from ctypes import sizeof
 from io import BytesIO
 
-from io_import_mage.format.structs.mop_struct import *
+from .structs.mop_struct import *
 
 
 class MOPFile:
@@ -51,7 +51,7 @@ class MOPFile:
 			anim.close()
 
 	def load(self, name):
-		from io_import_mage.format.kfm import KFMFile
+		from .kfm import KFMFile
 
 		if name not in self.animations:
 			return None
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
-			from io_import_mage.format.mage import MageFile
+			from .mage import MageFile
 
 			with MageFile(f) as mage_file:
 				with MOPFile(mage_file.get_motion(0)) as mop_file:

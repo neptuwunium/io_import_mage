@@ -4,7 +4,7 @@
 
 from ctypes import BigEndianStructure
 
-from io_import_mage.format.structs.enums import KFMChannelStorage, KFMChannelTarget
+from .enums import KFMChannelStorage, KFMChannelTarget
 
 
 class KFMFrameNode(BigEndianStructure):

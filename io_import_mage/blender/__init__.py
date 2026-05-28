@@ -10,9 +10,9 @@ from bpy.props import StringProperty, CollectionProperty
 from bpy.types import Operator, Context, Property, OperatorFileListElement, TOPBAR_MT_file_import
 from bpy_extras.io_utils import ImportHelper
 
-from io_import_mage.blender.import_nud import import_nud
-from io_import_mage.format import *
-from io_import_mage.format.structs.enums import MageFileType
+from .import_nud import import_nud
+from ..format import *
+from ..format.structs.enums import MageFileType
 
 
 # noinspection PyPep8Naming

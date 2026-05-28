@@ -6,8 +6,8 @@ from io import BytesIO
 from types import TracebackType
 from typing import IO, Optional
 
-from io_import_mage.format.kfm import KFMFile
-from io_import_mage.format.structs.mop_struct import *
+from .kfm import KFMFile
+from .structs.mop_struct import *
 
 
 class MOPFile:

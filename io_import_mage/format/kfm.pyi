@@ -7,8 +7,8 @@ from typing import IO, Optional
 import numpy as np
 import numpy.typing as npt
 
-from io_import_mage.format.structs.enums import KFMChannelTarget
-from io_import_mage.format.structs.kfm_struct import *
+from .structs.enums import KFMChannelTarget
+from .structs.kfm_struct import *
 
 
 class KFMNode:

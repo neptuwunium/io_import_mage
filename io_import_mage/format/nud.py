@@ -9,9 +9,9 @@ from typing import Optional
 import numpy as np
 import numpy.lib.recfunctions as rfn
 
-from io_import_mage.format import vertex_info
-from io_import_mage.format.structs.nud_struct import *
-from io_import_mage.format.vertex_info import *
+from . import vertex_info
+from .structs.nud_struct import *
+from .vertex_info import *
 
 
 class NUDVertexType:
@@ -305,7 +305,7 @@ if __name__ == '__main__':
 
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
-			from io_import_mage.format.mage import MageFile
+			from .mage import MageFile
 
 			with MageFile(f) as mage_file:
 				nud_file = NUDFile(mage_file.get_mesh(0))

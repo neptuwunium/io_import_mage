@@ -8,8 +8,8 @@ from io import BytesIO
 
 import numpy as np
 
-from io_import_mage.format.structs.enums import KFMChannelStorage
-from io_import_mage.format.structs.kfm_struct import *
+from .structs.enums import KFMChannelStorage
+from .structs.kfm_struct import *
 
 
 class KFMNode:
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
-			from io_import_mage.format.mage import MageFile
+			from .mage import MageFile
 
 			with MageFile(f) as mage_file:
 				with MOPFile(mage_file.get_motion(0)) as mop_file:

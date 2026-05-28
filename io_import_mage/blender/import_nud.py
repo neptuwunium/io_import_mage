@@ -6,9 +6,9 @@ import bpy
 import math
 import numpy as np
 
-from io_import_mage.blender.import_mnt import create_skeleton
-from io_import_mage.format.nud import NUDTriangleStream, NUDVertexStream
-from io_import_mage.format.vertex_info import NUDVertexSkinType
+from ..blender.import_mnt import create_skeleton
+from ..format.nud import NUDTriangleStream, NUDVertexStream
+from ..format.vertex_info import NUDVertexSkinType
 
 
 def create_material(name):
@@ -57,7 +57,8 @@ def import_nud(nud, mnt, mop, name, super_root, shared):
 		elif obj.header.mnt_index < bone_count:
 			blend_obj.parent_type = 'BONE'
 			blend_obj.parent_bone = bones[obj.header.mnt_index]
-			blend_obj.parent_bone_head_tail_factor = 0
+			if bpy.app.version >= (5, 2, 0):
+				blend_obj.parent_bone_head_tail_factor = 0
 
 		# todo: this blows up if the primitives aren't samey, check what values need to be zeroed
 		for prim_idx, prim in enumerate(obj.primitives):
@@ -149,8 +150,8 @@ def import_nud(nud, mnt, mop, name, super_root, shared):
 
 if __name__ == '__main__':
 	import sys
-	from io_import_mage.format import *
-	from io_import_mage.format.structs.enums import MageFileType
+	from ..format import *
+	from ..format.structs.enums import MageFileType
 
 	nud_root = bpy.data.objects.new("NUD", None)
 	nud_root.rotation_euler = (math.pi / 2, 0, 0)

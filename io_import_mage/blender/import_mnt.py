@@ -7,9 +7,9 @@ from typing import Optional
 import bpy
 import mathutils
 
-from io_import_mage.format import MOPFile
-from io_import_mage.format.kfm import KFMNode
-from io_import_mage.format.structs.enums import KFMChannelTarget
+from ..format import MOPFile
+from ..format.kfm import KFMNode
+from ..format.structs.enums import KFMChannelTarget
 
 
 def get_trans(node: Optional[KFMNode]) -> tuple[float, float, float]:

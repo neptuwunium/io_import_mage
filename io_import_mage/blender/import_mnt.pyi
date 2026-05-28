@@ -6,7 +6,7 @@ from typing import Optional
 
 import bpy
 
-from io_import_mage.format import *
+from ..format import *
 
 
 def create_skeleton(mnt: Optional[MNTFile], kfm: Optional[MOPFile | KFMFile], root: bpy.types.Object,

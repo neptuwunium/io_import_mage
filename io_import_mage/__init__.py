@@ -5,8 +5,8 @@
 bl_info = {
 	'name': 'io_import_mage',
 	'author': 'neptuwunium',
-	'version': (1, 0, 0),
-	'blender': (5, 1, 0),
+	'version': (1, 0, 1),
+	'blender': (4, 5, 0),
 	'location': 'File > Import > MAGE',
 	'description': 'Import MAGE Actor',
 	'warning': '',
@@ -15,13 +15,13 @@ bl_info = {
 	'category': 'Import-Export'
 }
 
-import io_import_mage.blender
+from . import blender
 
 
-def register(): io_import_mage.blender.register()
+def register(): blender.register()
 
 
-def unregister(): io_import_mage.blender.unregister()
+def unregister(): blender.unregister()
 
 
 if __name__ == '__main__':

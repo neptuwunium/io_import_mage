@@ -6,7 +6,7 @@ from io import BytesIO
 from types import TracebackType
 from typing import Optional, IO
 
-from io_import_mage.format.structs.enums import MageFileType
+from .structs.enums import MageFileType
 
 
 class MageFile:

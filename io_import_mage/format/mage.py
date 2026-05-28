@@ -5,8 +5,8 @@
 from ctypes import sizeof
 from io import BytesIO
 
-from io_import_mage.format.structs.enums import MageFileType
-from io_import_mage.format.structs.mage_struct import *
+from .structs.enums import MageFileType
+from .structs.mage_struct import *
 
 OFFSET_RANGES = {
 	0x0000: {

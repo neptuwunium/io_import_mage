@@ -4,7 +4,7 @@
 
 from ctypes import sizeof
 
-from io_import_mage.format.structs.mnt_struct import *
+from .structs.mnt_struct import *
 
 
 class MNTNode:
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
 	with open(sys.argv[1], 'rb') as f:
 		if sys.argv[1].endswith('.mage'):
-			from io_import_mage.format.mage import MageFile
+			from .mage import MageFile
 
 			with MageFile(f) as mage_file:
 				mnt_file = MNTFile(mage_file.get_node(0))

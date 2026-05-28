@@ -7,8 +7,8 @@ from typing import Optional, IO
 import numpy as np
 import numpy.typing as npt
 
-from io_import_mage.format.structs.nud_struct import *
-from io_import_mage.format.vertex_info import *
+from .structs.nud_struct import *
+from .vertex_info import *
 
 
 class NUDVertexType:
