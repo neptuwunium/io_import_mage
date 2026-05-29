@@ -4,6 +4,7 @@
 
 import bpy
 import math
+import mathutils
 import numpy as np
 
 from ..blender.import_mnt import create_skeleton
@@ -59,6 +60,10 @@ def import_nud(nud, mnt, mop, name, super_root, shared):
 			blend_obj.parent_bone = bones[obj.header.mnt_index]
 			if bpy.app.version >= (5, 2, 0):
 				blend_obj.parent_bone_head_tail_factor = 0
+			else:
+				blend_obj.matrix_parent_inverse = mathutils.Matrix.Translation((0, -1, 0))
+				blend_obj.location = (0.0, 0.0, 0.0)
+				blend_obj.rotation_euler = (0.0, 0.0, 0.0)
 
 		# todo: this blows up if the primitives aren't samey, check what values need to be zeroed
 		for prim_idx, prim in enumerate(obj.primitives):
