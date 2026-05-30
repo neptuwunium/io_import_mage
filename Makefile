@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-BLENDER = blender
+BLENDER ?= blender
 
 .PHONY: dirs build clean
 

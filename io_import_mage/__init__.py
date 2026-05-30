@@ -5,7 +5,7 @@
 bl_info = {
 	'name': 'io_import_mage',
 	'author': 'neptuwunium',
-	'version': (1, 0, 2),
+	'version': (1, 0, 3),
 	'blender': (4, 5, 0),
 	'location': 'File > Import > MAGE',
 	'description': 'Import MAGE Actor',
