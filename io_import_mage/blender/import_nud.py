@@ -7,7 +7,7 @@ import math
 import mathutils
 import numpy as np
 
-from ..blender.import_mnt import create_skeleton
+from .import_mnt import create_skeleton
 from ..format.nud import NUDTriangleStream, NUDVertexStream
 from ..format.vertex_info import NUDVertexSkinType
 

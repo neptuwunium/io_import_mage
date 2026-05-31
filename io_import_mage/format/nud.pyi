@@ -11,6 +11,12 @@ from .structs.nud_struct import *
 from .vertex_info import *
 
 
+def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.NDArray: pass
+
+
+def normalize(array: np.typing.NDArray, only_drop: bool = True, fallback: Optional[float] = None, rescale: float = 1.0) -> np.typing.NDArray: pass
+
+
 class NUDVertexType:
 	geometry_type: NUDVertexGeometryType
 	skin_type: NUDVertexSkinType

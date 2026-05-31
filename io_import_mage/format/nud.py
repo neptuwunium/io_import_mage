@@ -82,7 +82,7 @@ STORAGE_TO_NUMPY = {
 
 
 # 16-bit or unorm to 32-bit
-def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.NDArray:
+def unwrap(array, storage):
 	match storage:
 		case VertexStorageType.RGBA8_UNORM:
 			return array / 255.0
@@ -96,7 +96,7 @@ def unwrap(array: np.typing.NDArray, storage: VertexStorageType) -> np.typing.ND
 			return array
 
 
-def normalize(array: np.typing.NDArray, only_drop: bool = True, fallback: Optional[float] = None, rescale: float = 1.0):
+def normalize(array, only_drop = True, fallback = None, rescale = 1.0):
 	if array.shape[1] != 4:
 		if only_drop or fallback is None: return array
 		multiplier = fallback
