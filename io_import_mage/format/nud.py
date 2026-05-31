@@ -4,7 +4,6 @@
 
 import struct
 from ctypes import sizeof
-from typing import Optional
 
 import numpy as np
 import numpy.lib.recfunctions as rfn

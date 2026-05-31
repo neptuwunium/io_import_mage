@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from typing import Optional
-
 import bpy
 import mathutils
 
@@ -12,7 +10,7 @@ from ..format.kfm import KFMNode
 from ..format.structs.enums import KFMChannelTarget
 
 
-def get_trans(node: Optional[KFMNode]) -> tuple[float, float, float]:
+def get_trans(node):
 	if not node or len(node.values) == 0:
 		return 0, 0, 0
 
@@ -20,7 +18,7 @@ def get_trans(node: Optional[KFMNode]) -> tuple[float, float, float]:
 	return tuple(node.values[0])
 
 
-def get_scale(node: Optional[KFMNode]) -> tuple[float, float, float]:
+def get_scale(node):
 	if not node or len(node.values) == 0:
 		return 1, 1, 1
 
@@ -28,7 +26,7 @@ def get_scale(node: Optional[KFMNode]) -> tuple[float, float, float]:
 	return tuple(node.values[0])
 
 
-def get_rot(node: Optional[KFMNode]) -> tuple[float, float, float, float]:
+def get_rot(node):
 	if not node or len(node.values) == 0:
 		return 1, 0, 0, 0
 
