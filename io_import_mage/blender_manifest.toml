@@ -6,7 +6,7 @@ schema_version = "1.0.0"
 
 id = "io_import_mage"
 version = "1.0.4"
-name = "MAGE Import"
+name = "MAGE Mesh Actor Import"
 tagline = "Import MAGE files from the Ulysses extraction tools"
 maintainer = "neptuwunium"
 type = "add-on"

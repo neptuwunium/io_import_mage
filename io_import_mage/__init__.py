@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 bl_info = {
-	'name': 'io_import_mage',
+	'name': 'MAGE Mesh Actor Import',
 	'author': 'neptuwunium',
 	'version': (1, 0, 4),
 	'blender': (4, 5, 0),
